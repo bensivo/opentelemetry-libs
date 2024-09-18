@@ -11,10 +11,10 @@ go get github.com/bensivo/opentelemetry-libs/packages/opentelemetry-tracing-go/p
 ## Usage
 ```go
 import (
-	"context"
+    "context"
     "errors"
 
-	"github.com/bensivo/opentelemetry-libs/packages/opentelemetry-tracing-go/pkg/tracing"
+    "github.com/bensivo/opentelemetry-libs/packages/opentelemetry-tracing-go/pkg/tracing"
 )
 
 func main() {
