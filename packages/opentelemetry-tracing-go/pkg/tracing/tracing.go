@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+    "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
@@ -19,13 +19,18 @@ type InitializeOptions struct {
     ServiceName string
     ServiceVersion string
     DeploymentEnvironment string
+
+    OtlpEndpoint string // GRPC endpoint and port, do not include protocol. e.g "localhost:4317"
+    OtlpHeaders map[string]string // Headers, usually for authentication
 }
 
 func Initialize(opts InitializeOptions) {
-
-    // Exporter here defines where the traces should be sent to
-    // for now, we're using the stdout exporter to just log to the console
-    exporter, err := stdouttrace.New()
+    // Exporter defines where the traces should be sent to
+    // In this case, we export traces using the OTLP Protocol, over gRPC
+    exporter, err := otlptracegrpc.New(context.Background(), 
+        otlptracegrpc.WithEndpointURL(opts.OtlpEndpoint),
+        otlptracegrpc.WithHeaders(opts.OtlpHeaders),
+    )
     if err != nil {
         fmt.Println("Failed to create stdout exporter:", err)
     }
@@ -53,10 +58,17 @@ func Initialize(opts InitializeOptions) {
 }
 
 func Shutdown(ctx context.Context) {
+    err := provider.ForceFlush(ctx)
+    if err != nil {
+        fmt.Println("Failed to flush:", err)
+    }
     provider.Shutdown(ctx)
 }
 
+// StartSpan creates a new span with the given name
+//   TODO: Add support for a parent span
 func StartSpan(ctx context.Context, name string) trace.Span {
     ctx, span := tracer.Start(ctx, name)
     return span
 }
+
