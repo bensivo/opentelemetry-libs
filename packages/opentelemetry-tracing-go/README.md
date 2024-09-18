@@ -10,6 +10,8 @@ go get github.com/bensivo/opentelemetry-libs/packages/opentelemetry-tracing-go/p
 
 ## Usage
 ```go
+package main
+
 import (
     "context"
     "errors"
